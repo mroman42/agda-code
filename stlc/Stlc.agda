@@ -5,7 +5,7 @@ data Type : Set where
   ⊤ : Type
   _×_ : Type → Type → Type
   _⊃_  : Type → Type → Type
-open import Context (Type)
+open import Context (Type) public
 
 
 infix 4 _⊢_

@@ -1,7 +1,5 @@
 module Context (Type : Set) where
 
-open import Equality
-
 data Cxt : Set where
   ∗ : Cxt
   _,_ : Cxt → Type → Cxt
