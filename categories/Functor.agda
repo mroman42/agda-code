@@ -4,6 +4,7 @@ open import Equality
 open import Categories hiding (_∘_)
 
 
+-- Functors between two categories.
 record Functor (C D : Category) : Set where
   private module C = Category C
   private module D = Category D
@@ -48,6 +49,18 @@ _∘_ {C} {D} {E} G F = record
     open D renaming (_∘_ to _∘₂_)    
     open E renaming (_∘_ to _∘₃_)
 
--- record NaturalTransformation {C D : Category} (F G : Functor C D) : Set where
+
+
+record NaturalTransformation {C D : Category} (F G : Functor C D) : Set where
+  private module C = Category C
+  private module D = Category D
+  private module F = Functor F
+  private module G = Functor G
+  field
+    η : {A : C.obj} → D.hom (F.fobj A) (G.fobj A)
+    naturality : {A B : C.obj} {f : C.hom A B} →
+      η {B} D.∘ (F.fmap f) ≡ (G.fmap f) D.∘ η {A}    
+open NaturalTransformation {{...}} public
+  
   
     
