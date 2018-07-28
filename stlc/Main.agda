@@ -123,10 +123,16 @@ record TypedExpr (Γ : Cxt) : Set where
     A : Type
     expr : Γ ⊢ A
 
+{-# NON_TERMINATING #-}
 expression : (Γ : Cxt) → Parser (TypedExpr Γ)
-expression Γ = choice []
+expression Γ = choice (
+  parens (expression Γ) ∷
+  
+  []
+  )
   where
-    
+    pi1parser : Parser (TypedExpr Γ)
+    pi1parser = {!!}
 
 
 
