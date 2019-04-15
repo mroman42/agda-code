@@ -64,7 +64,7 @@ open LensC public
 lensC2P : {s t a b : Set} -> LensC s t a b -> Lens s t a b
 lensC2P l x = dimap (λ s -> (s , view l s)) (update l) (sfirst x)
 
--- From profunctor to concrete, from concrete to profunctor.
+-- From profunctor to concrete
 instance
   lens-profunctor : {a b : Set} -> Profunctor (λ s t -> LensC s t a b)
   lens-profunctor = profunctor λ f g l -> lens (view l ∘ f) (g ∘ update l ∘ first f)
@@ -89,3 +89,22 @@ record PrismC (s t a b : Set) : Set where
     match : s -> t + a
     build : b -> t
 open PrismC public
+
+
+-- From concrete to profunctor.
+prismC2P : {s t a b : Set} -> PrismC s t a b -> Prism s t a b
+prismC2P l x = dimap (match l) (either id (build l)) (sright x)
+
+-- From profunctor to concrete
+instance
+  prism-profunctor : {a b : Set} -> Profunctor (λ s t -> PrismC s t a b)
+  prism-profunctor = profunctor λ f g l → prism (mapEither g id ∘ match l ∘ f) (g ∘ build l)
+
+  prism-cocartesian : {a b : Set} -> Cocartesian (λ s t -> PrismC s t a b)
+  prism-cocartesian = cocartesian λ l → prism (either (left ∘ left) (mapEither right id ∘ match l)) (right ∘ build l)
+
+prismP2C : {s t a b : Set} -> Prism s t a b -> PrismC s t a b
+prismP2C l = l (prism right id)
+
+
+-- Can both be derived only using only the monoidal and the Tambara structure?
