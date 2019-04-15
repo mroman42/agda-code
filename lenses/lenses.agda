@@ -1,6 +1,7 @@
 {-# OPTIONS --type-in-type #-}
 
 open import Prelude.Product
+open import Prelude.Sum renaming (Either to _+_)
 open import Prelude.Function
 
 π₁ : {a b : Set} -> a × b -> a
@@ -75,3 +76,16 @@ lensP2C : {s t a b : Set} -> Lens s t a b -> LensC s t a b
 lensP2C l = l (lens id π₂)
 
 
+
+------------
+-- PRISMS --
+------------
+Prism : Set -> Set -> Set -> Set -> Set
+Prism s t a b = {p : Set -> Set -> Set} {{_ : Cocartesian p}} -> p a b -> p s t
+
+record PrismC (s t a b : Set) : Set where
+  constructor prism
+  field
+    match : s -> t + a
+    build : b -> t
+open PrismC public
