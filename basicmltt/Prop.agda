@@ -156,3 +156,6 @@ open Or public
 -- version.
 uip : {A : Set} → {a b : A} → isProp (a ≡ b)
 uip {A} {a} {.a} refl refl = refl
+
+uip' : {A : Set} → {x y : A} → (p q : x ≡ y) → p ≡ q
+uip' refl refl = refl
