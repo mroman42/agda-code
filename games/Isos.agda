@@ -64,6 +64,7 @@ instance
   cartesian-unit-right : {a : Set} -> a × Unit ≅ a
   cartesian-unit-right = record { iso = fst ; inviso = λ x -> x , unit }
 
+
   cocartesian-unit : {a : Set} -> ⊥ + a ≅ a
   cocartesian-unit = record { iso = λ { (left ()) ; (right x) -> x } ; inviso = λ x -> right x }
   
@@ -79,6 +80,11 @@ instance
   { iso = λ z -> _≅_.iso v (_≅_.iso u z)
   ; inviso = λ z -> _≅_.inviso u (_≅_.inviso v z)
   }
+
+instance
+  cartesian-unit-right-double : {a : Set} -> (a × Unit) × Unit ≅ a
+  cartesian-unit-right-double = ≅-trans cartesian-unit-right cartesian-unit-right
+
 
 symmetric : {A B : Set}
   -> A ≅ B
