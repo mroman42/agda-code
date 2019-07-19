@@ -140,3 +140,22 @@ test = best PrisonersDilemma unit (λ _ -> unit)
   (false , false)
   (true , true)
 
+
+
+-- Exponential of games.
+exponential : {Σ S T U V A B : Set}
+  -> Game Σ (S × U) (T × V) A B
+  -> Game Σ S T ((U -> A) × (U × B -> V)) (U × B)
+exponential record { play = play ; coplay = coplay ; best = best }
+  = record
+  { play = λ σ s -> (λ u -> play σ (s , u)) , λ { (u , b) -> snd (coplay σ (s , u) b) }
+  ; coplay = λ { σ s (u , b) -> fst (coplay σ (s , u) b) }
+  ; best = λ s f σ σ' ->
+      best (s , fst (f ((λ u -> play σ (s , u)) , λ { (u , b) -> snd (coplay σ' (s , u) b) })))
+        (λ a -> snd (f ((λ u -> play σ (s , u)) , λ { (u , b) -> snd (coplay σ' (s , u) b) })))
+        σ σ'
+  }
+
+-- (?): If best response admits a nice exponential, it should be
+-- related to the cartesian structure, because the optics need the
+-- cartesian structure to get the exponential.
