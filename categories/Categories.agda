@@ -1,4 +1,5 @@
 {-# OPTIONS --type-in-type #-}
+
 module Categories where
 
 open import Equality
