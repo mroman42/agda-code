@@ -1,5 +1,6 @@
 {-# OPTIONS --type-in-type #-}
 {-# OPTIONS --rewriting #-}
+{-# OPTIONS --with-K #-}
 
 -- A finite function n → m is a Vec n (Finset m).
 -- We will prove finite functions form an op-copy-discard category first.
@@ -13,11 +14,15 @@ open import Data.Vec
 open import Data.Nat
 open import Data.Vec.Properties
 open import Data.Empty
-open import Data.Nat.Properties using (+-identityʳ)
+open import Data.Nat.Properties using (+-identityʳ ; +-assoc)
 open import Relation.Binary.PropositionalEquality.Core using (_≡_; refl; trans; cong; sym)
 open import Data.List renaming (map to lmap ; lookup to llookup ; _++_ to _++l_)
 open import Tactic.Cong
 open import Relation.Binary.PropositionalEquality.Properties using (module ≡-Reasoning)
+open import Relation.Binary.HeterogeneousEquality as ≅ using (_≅_ ; module ≅-Reasoning)
+
+-- {-# REWRITE +-assoc #-}
+{-# REWRITE +-identityʳ #-}
 
 transport : ∀ {A} -> (P : A → Set) -> {x y : A} -> (x ≡ y) -> P x -> P y
 transport _ refl u = u
@@ -138,7 +143,7 @@ postulate
 
 -- Inclusion functions, iotas.
 ι : ∀{x y} -> Function x (x + y)
-ι {x} = map ιinj (id x)
+ι {x} {y} = map (ιinj {x} {y}) (id x)
 
 ρ : ∀{x y} -> Function x (y + x)
 ρ {x} = map ρinj (id x)
@@ -150,25 +155,35 @@ postulate
 coproduct : ∀{x y z} -> Function x z -> Function y z -> Function (x + y) z
 coproduct f g = f ++ g
 
-postulate
-  +-assoc : ∀ x y z -> x + y + z ≡ x + (y + z)
-
--- (++-assoc)
 coproduct-associative : ∀ {x y z w} 
-  -> .(eq : (x + y) + z ≡ x + (y + z)) 
   -> (f : Function x w) 
   -> (g : Function y w) 
   -> (h : Function z w)
-  -> cast eq ((f ++ g) ++ h) ≡ f ++ (g ++ h)
-coproduct-associative eq [] g h = cast-is-id eq (g ++ h)
-coproduct-associative eq (x ∷ f) g h = cong (x ∷_) (coproduct-associative (cong pred eq) f g h)
+  -> ((f ++ g) ++ h) ≅ f ++ (g ++ h)
+coproduct-associative [] g h = ≅.refl
+coproduct-associative {w = w} (f₁ ∷ f) g h = ≅.icong {!   !} {!   !} (coproduct-associative f g h)
+
+-- coproduct-associative : ∀ {x y z w} 
+--   -> (f : Function x w) 
+--   -> (g : Function y w) 
+--   -> (h : Function z w)
+--   -> ((f ++ g) ++ h) ≡ f ++ (g ++ h)
+-- coproduct-associative [] g h = refl
+-- coproduct-associative (x ∷ f) g h = cong (x ∷_) (coproduct-associative f g h)
+
+vec-unital : ∀ {A x}
+  -> (X : Vec A x)
+  -> X ++ [] ≡ X
+vec-unital [] = refl
+vec-unital (X₁ ∷ X) = cong (X₁ ∷_) (vec-unital X)  
+  
 
 private
   variable
     x₁ x₂ x₃ y₁ y₂ y₃ : ℕ
 
-tensor : Function x₁ y₁ -> Function x₂ y₂ -> Function (x₁ + x₂) (y₁ + y₂)
-tensor f g = (ι ∘ f) ++ (ρ ∘ g)
+tensor : ∀{x₁ x₂ y₁ y₂} -> Function x₁ y₁ -> Function x₂ y₂ -> Function (x₁ + x₂) (y₁ + y₂)
+tensor {x₁} {x₂} {y₁} {y₂} f g = (ι {y₁} {y₂} ∘ f) ++ (ρ ∘ g)
 
 _⊕_ = tensor
 
@@ -176,10 +191,11 @@ castfv : ∀{A m n} .(eq : m ≡ n) → Vec (Fin m) A → Vec (Fin n) A
 castfv eq [] = []
 castfv eq (x ∷ v) = castf eq x ∷ castfv eq v
 
-postulate
-  reindex-whiskering : ∀{A x y u} (φ : Function u x) (X : Vec A x) (Y : Vec A y)
-    -> reindex (φ ⊕ id y) (X ++ Y) ≡ reindex φ X ++ Y
 
+-- reindex-whiskering : ∀{A x y u} (φ : Function u x) (X : Vec A x) (Y : Vec A y)
+--   -> reindex (φ ⊕ id y) (X ++ Y) ≡ reindex φ X ++ Y
+-- reindex-whiskering {y = zero} φ X [] = {!  !}
+-- reindex-whiskering {y = suc y} φ X Y = {!   !}
 
 
 -- tensor-assoc :
@@ -195,4 +211,4 @@ postulate
 --      (f₁ ⊕ (f₂ ⊕ f₃))
 --   ∎
 --   where open ≡-Reasoning
-   
+    

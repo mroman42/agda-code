@@ -53,23 +53,22 @@ module Theory (Σ : Signature) where
     (Arrow (reindex φ U) Y)
     -> Arrow U Y
   φ * (ret α) = ret (φ ∘ α)
-  _*_ {x = x} {y = y} {u = u} {U = U} {Y = Y}
+  _*_ {y = y} {u = u} {U = U} {Y = Y}
     φ (arr {y = y₁} {Y = Y₁} β f t) 
-    rewrite cong (λ i -> gen Σ i Y₁) (sym (reindexFunctorial β φ U))
     rewrite sym (cong (λ i -> Arrow i Y) (reindex-whiskering φ U Y₁))
     =
     arr (φ ∘ β) f ((φ ⊕ (id y₁)) * t)
 
   -- Rewiring functorial
-  rewiring-composition : ∀ {x y u v}
-    {X : Vec (type Σ) x}
-    {Y : Vec (type Σ) y}
-    (φ : Function u x)
-    (ψ : Function v u)
-    (t : Arrow (reindex ψ (reindex φ X)) Y)
-    -> (φ ∘ ψ) * t ≡ φ * (ψ * t)
-  rewiring-composition φ ψ (ret α) = {! !}
-  rewiring-composition φ ψ (arr β x t) = {!   !}
+  -- rewiring-composition : ∀ {x y u v}
+  --   {X : Vec (type Σ) x}
+  --   {Y : Vec (type Σ) y}
+  --   (φ : Function u x)
+  --   (ψ : Function v u)
+  --   (t : Arrow (reindex ψ (reindex φ X)) Y)
+  --   -> (φ ∘ ψ) * t ≡ φ * (ψ * t)
+  -- rewiring-composition φ ψ (ret α) = {! !}
+  -- rewiring-composition φ ψ (arr β x t) = {!   !}
   
 open Theory public
 
