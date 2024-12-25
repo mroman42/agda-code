@@ -1,9 +1,11 @@
 {-# OPTIONS --type-in-type #-}
+{-# OPTIONS --rewriting #-}
 
 -- A finite function n → m is a Vec n (Finset m).
 -- We will prove finite functions form an op-copy-discard category first.
 
 open import Agda.Builtin.Equality
+open import Agda.Builtin.Equality.Rewrite
 
 
 open import Data.Fin renaming (_+_ to _+f_) hiding (pred) renaming (cast to castf)
@@ -65,15 +67,17 @@ reindexAssociative α β γ = sym (
   )
   where open ≡-Reasoning
 
-private
-  variable
-    x y z w : ℕ
 
-reindexFunctorial : ∀{A} (α : Function x y) (β : Function y z) (Z : Vec A z)
-     -> reindex (β ∘ α) Z ≡ reindex α (reindex β Z)
+reindexFunctorial : ∀{A x y z} 
+  (α : Function x y) 
+  (β : Function y z) 
+  (Z : Vec A z)
+  -> reindex (β ∘ α) Z ≡ reindex α (reindex β Z)
 reindexFunctorial α β Z = reindexAssociative α β Z
 
-composition-associative : 
+
+
+composition-associative : ∀{x y z w}
     (f : Function x y) -> (g : Function y z) -> (h : Function z w)
     -> (h ∘ (g ∘ f)) ≡ ((h ∘ g) ∘ f)
 composition-associative f g h = reindexFunctorial f g h
@@ -81,7 +85,7 @@ composition-associative f g h = reindexFunctorial f g h
 -- suc-id : ∀{x} -> zero ∷ map suc (id x) ≡ id (suc x) 
 -- suc-id = refl
 
-lookup-suc-map : {f₁ : Fin y} (l : Vec (Fin x) z) (f : Vec (Fin y) x)
+lookup-suc-map : ∀{x y z} {f₁ : Fin y} (l : Vec (Fin x) z) (f : Vec (Fin y) x)
   -> map (lookup (f₁ ∷ f)) (map suc l) ≡ map (lookup f) l
 lookup-suc-map {z = zero} [] f = refl
 lookup-suc-map {z = suc z} (x ∷ l) f = cong (lookup f x ∷_) (lookup-suc-map l f)
@@ -150,7 +154,8 @@ postulate
   +-assoc : ∀ x y z -> x + y + z ≡ x + (y + z)
 
 -- (++-assoc)
-coproduct-associative : ∀ .(eq : (x + y) + z ≡ x + (y + z)) 
+coproduct-associative : ∀ {x y z w} 
+  -> .(eq : (x + y) + z ≡ x + (y + z)) 
   -> (f : Function x w) 
   -> (g : Function y w) 
   -> (h : Function z w)

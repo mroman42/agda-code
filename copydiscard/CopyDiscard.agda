@@ -26,6 +26,8 @@ record Signature : Set where
 open Signature public 
 
 
+{-# REWRITE reindexAssociative #-}
+
 module Theory (Σ : Signature) where
 
   data Arrow : ∀{n m} -> Vec (type Σ) n → Vec (type Σ) m → Set where
@@ -44,14 +46,13 @@ module Theory (Σ : Signature) where
       -> Arrow X Z
       
   -- Rewiring
-  _*_ : ∀{x y u} {U : Vec (type Σ) u} {Y : Vec (type Σ) y} 
-    -> (φ : Function x u) 
-    -> Arrow (reindex φ U) Y 
+  _*_ : ∀ {x y u} 
+    {U : Vec (type Σ) u} 
+    {Y : Vec (type Σ) y} ->
+    (φ : Function x u) ->
+    (Arrow (reindex φ U) Y)
     -> Arrow U Y
-  _*_ {U = U} 
-    φ (ret α)  
-    rewrite (cong (Arrow U) (sym (reindexFunctorial α φ U))) 
-    = ret (φ ∘ α)
+  φ * (ret α) = ret (φ ∘ α)
   _*_ {x = x} {y = y} {u = u} {U = U} {Y = Y}
     φ (arr {y = y₁} {Y = Y₁} β f t) 
     rewrite cong (λ i -> gen Σ i Y₁) (sym (reindexFunctorial β φ U))
@@ -59,6 +60,17 @@ module Theory (Σ : Signature) where
     =
     arr (φ ∘ β) f ((φ ⊕ (id y₁)) * t)
 
+  -- Rewiring functorial
+  rewiring-composition : ∀ {x y u v}
+    {X : Vec (type Σ) x}
+    {Y : Vec (type Σ) y}
+    (φ : Function u x)
+    (ψ : Function v u)
+    (t : Arrow (reindex ψ (reindex φ X)) Y)
+    -> (φ ∘ ψ) * t ≡ φ * (ψ * t)
+  rewiring-composition φ ψ (ret α) = {! !}
+  rewiring-composition φ ψ (arr β x t) = {!   !}
+  
 open Theory public
 
 data ⊤ : Set where
