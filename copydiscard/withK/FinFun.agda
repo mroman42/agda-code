@@ -1,19 +1,27 @@
 {-# OPTIONS --type-in-type #-}
-{-# OPTIONS --cubical #-}
 {-# OPTIONS --allow-unsolved-metas #-}
 
-open import Cubical.Foundations.Prelude
-open import Cubical.Data.Bool hiding (_⊕_)
-open import Cubical.Data.Vec
-open import Cubical.Data.Nat
-open import Cubical.Data.FinData
+open import Data.Fin renaming (_+_ to _+f_) hiding (pred) renaming (cast to castf)
+open import Data.Vec
+open import Data.Nat
+open import Data.Vec.Properties hiding (++-assoc)
+open import Data.Empty
+open import Data.Nat.Properties using (+-identityʳ ; +-assoc)
+open import Relation.Binary.PropositionalEquality.Core using (_≡_; refl; trans; cong; sym)
+open import Data.List renaming (map to lmap ; lookup to llookup ; _++_ to _++l_)
+open import Tactic.Cong
+open import Relation.Binary.PropositionalEquality.Properties using (module ≡-Reasoning)
 
 postulate
   trustMe : ∀ {a} {A : Set a} {x y : A} → x ≡ y
 
+_!!_ : ∀ {A B} -> A -> A ≡ B -> B
+a !! refl = a
+
+
 opaque
   looksup : ∀ {n} {A : Set} → Vec A n → Fin n → A
-  looksup v f = lookup f v
+  looksup v f = lookup v f
 
 map-functoriality : ∀ {A B C n} (f : A -> B) (g : B -> C) (l : Vec A n) -> map g (map f l) ≡ map (λ i -> g (f i)) l
 map-functoriality f g [] = refl
@@ -65,6 +73,10 @@ f ⊳ g = map (looksup g) f
 ρ : ∀{x} y -> Function x (y + x)
 ρ {x} y = map ρinj id
 
+-- α≅ : ∀ {x} {y} {z} -> Function (x + (y + z)) ((x + y) + z)
+-- α≅ {x} {y} {z} = id {x + y + z} !! cong (λ i -> Function i (x + y + z)) (sym (+-assoc x y z))
+
+
 
 pairing : ∀ {x₁ x₂ y} -> Function x₁ y -> Function x₂ y -> Function (x₁ + x₂) y
 pairing f g = f ++ g
@@ -93,3 +105,4 @@ _⊕_ {x₁} {x₂} {y₁} {y₂} f g = (f ⊳ ι y₂) ++ (g ⊳ ρ y₁)
 -- map (lookup (map (lookup γ) β)) α ≡⟨ map-extensionality (λ i -> lookup-map i (lookup γ) β) ⟩ 
 -- map (λ i -> lookup γ (lookup β i)) α ≡⟨ sym (map-functoriality α) ⟩ 
 -- map (lookup γ) (map (lookup β) α) ≡⟨⟩ 
+ 

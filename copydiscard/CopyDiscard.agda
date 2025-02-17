@@ -1,6 +1,5 @@
 {-# OPTIONS --type-in-type #-}
 
-
 -- A finite function n → m is a Vec n (Finset m).
 -- We will prove finite functions form an op-copy-discard category first.
 
